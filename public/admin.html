@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PhotoStudio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-camera"></i>
+                <span>PhotoStudio</span>
+            </div>
+            <ul class="nav-links">
+                <li>
+                    <a href="#" data-section="dashboard" class="active">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-section="photos">
+                        <i class="fas fa-images"></i>
+                        <span>Photos</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-section="categories">
+                        <i class="fas fa-folder"></i>
+                        <span>Categories</span>
+                    </a>
+                </li>
+            </ul>
+            <button id="logoutBtn" class="btn secondary">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section">
+                <div class="top-bar">
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="grid-container">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Total Photos</div>
+                            <div class="stat-icon" style="background: rgba(67, 97, 238, 0.1); color: var(--primary-color);">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="totalPhotos">0</div>
+                        <div class="stat-description">Photos in database</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Categories</div>
+                            <div class="stat-icon" style="background: rgba(76, 201, 240, 0.1); color: var(--success-color);">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="totalCategories">0</div>
+                        <div class="stat-description">Active categories</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Storage Used</div>
+                            <div class="stat-icon" style="background: rgba(239, 71, 111, 0.1); color: var(--error-color);">
+                                <i class="fas fa-database"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="totalStorage">0 MB</div>
+                        <div class="stat-description">Total storage used</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Photos Section -->
+            <section id="photos" class="content-section" style="display: none;">
+                <div class="top-bar">
+                    <h1>Photos</h1>
+                    <button class="btn primary" data-modal="uploadPhotoModal">
+                        <i class="fas fa-plus"></i>
+                        Upload Photo
+                    </button>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="photoSearch" placeholder="Search photos...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div id="photosList" class="photos-grid"></div>
+            </section>
+
+            <!-- Categories Section -->
+            <section id="categories" class="content-section" style="display: none;">
+                <div class="top-bar">
+                    <h1>Categories</h1>
+                    <button class="btn primary" data-modal="addCategoryModal">
+                        <i class="fas fa-plus"></i>
+                        Add Category
+                    </button>
+                </div>
+                <div id="categoriesList" class="categories-grid"></div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Upload Photo Modal -->
+    <div id="uploadPhotoModal" class="modal">
+        <div class="modal-content">
+            <h2>Upload Photo</h2>
+            <form id="uploadPhotoForm">
+                <div class="input-group">
+                    <label for="photoTitle">Title</label>
+                    <input type="text" id="photoTitle" name="title" required>
+                </div>
+                <div class="input-group">
+                    <label for="photoDescription">Description</label>
+                    <input type="text" id="photoDescription" name="description">
+                </div>
+                <div class="input-group">
+                    <label for="photoCategory">Category</label>
+                    <select id="photoCategory" name="categoryId" required>
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="photoFile">Photo</label>
+                    <input type="file" id="photoFile" name="photo" accept="image/*" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div id="addCategoryModal" class="modal">
+        <div class="modal-content">
+            <h2>Add Category</h2>
+            <form id="addCategoryForm">
+                <div class="input-group">
+                    <label for="categoryName">Name</label>
+                    <input type="text" id="categoryName" required>
+                </div>
+                <div class="input-group">
+                    <label for="categoryDescription">Description</label>
+                    <input type="text" id="categoryDescription" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn primary">Add Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast-container"></div>
+
+    <script src="admin.js"></script>
+    <script>
+        // Initialize after DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup navigation
+            document.querySelectorAll('.nav-links a[data-section]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = e.currentTarget.dataset.section;
+                    showSection(section);
+                });
+            });
+
+            // Setup modals
+            document.querySelectorAll('[data-modal]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const modalId = button.dataset.modal;
+                    openModal(modalId);
+                });
+            });
+
+            // Setup modal close buttons
+            document.querySelectorAll('[data-dismiss="modal"]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const modal = button.closest('.modal');
+                    if (modal) closeModal(modal.id);
+                });
+            });
+
+            // Setup forms
+            document.getElementById('uploadPhotoForm').addEventListener('submit', handlePhotoUpload);
+            document.getElementById('addCategoryForm').addEventListener('submit', handleCategorySubmit);
+
+            // Setup photo preview
+            document.getElementById('photoFile').addEventListener('change', previewImage);
+
+            // Initialize search
+            initializeSearch();
+
+            // Load initial data
+            showSection('dashboard');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - PhotoStudio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f8f9fa;
+        }
+
+        .navbar {
+            background: #764ba2;
+            padding: 1rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            border: 1px solid white;
+            border-radius: 5px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #764ba2;
+        }
+
+        .dashboard {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .content-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-camera"></i>
+            <h1>PhotoStudio Admin</h1>
+        </div>
+        <div class="user-info">
+            <span id="adminUsername">Admin</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <div class="number" id="totalUsers">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Photos</h3>
+                <div class="number" id="totalPhotos">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Categories</h3>
+                <div class="number" id="totalCategories">0</div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-header">
+                <h2>Recent Photos</h2>
+            </div>
+            <table id="photosTable">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>User</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="photosTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="content-section">
+            <div class="section-header">
+                <h2>Users</h2>
+            </div>
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Photos</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/admin.html';
+            }
+            // Set admin username
+            const adminData = JSON.parse(localStorage.getItem('adminData'));
+            document.getElementById('adminUsername').textContent = adminData.username;
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminData');
+            window.location.href = '/admin.html';
+        }
+
+        async function loadDashboardData() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                };
+
+                // Load photos
+                const photosResponse = await fetch('/api/admin/photos', { headers });
+                const photosData = await photosResponse.json();
+                document.getElementById('totalPhotos').textContent = photosData.photos.length;
+                
+                // Load users
+                const usersResponse = await fetch('/api/admin/users', { headers });
+                const usersData = await usersResponse.json();
+                document.getElementById('totalUsers').textContent = usersData.users.length;
+                
+                // Load categories
+                const categoriesResponse = await fetch('/api/admin/categories', { headers });
+                const categoriesData = await categoriesResponse.json();
+                document.getElementById('totalCategories').textContent = categoriesData.categories.length;
+
+                // Populate tables
+                populatePhotosTable(photosData.photos);
+                populateUsersTable(usersData.users);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function populatePhotosTable(photos) {
+            const tbody = document.getElementById('photosTableBody');
+            tbody.innerHTML = photos.map(photo => `
+                <tr>
+                    <td>${photo.title}</td>
+                    <td>${photo.category}</td>
+                    <td>${photo.user}</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editPhoto(${photo.id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deletePhoto(${photo.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function populateUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.photoCount}</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editUser(${user.id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize dashboard
+        checkAuth();
+        loadDashboardData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoStudio - Professional Photography</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .landing-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-700), var(--primary-900));
+            color: white;
+        }
+
+        .landing-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-200);
+        }
+
+        .landing-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .landing-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .landing-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .landing-button {
+            padding: 1rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .landing-button.primary {
+            background: white;
+            color: var(--primary-700);
+        }
+
+        .landing-button.primary:hover {
+            background: var(--primary-50);
+            transform: translateY(-2px);
+        }
+
+        .landing-button.secondary {
+            border: 2px solid white;
+            color: white;
+        }
+
+        .landing-button.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <i class="fas fa-camera landing-logo"></i>
+        <h1 class="landing-title">Welcome to PhotoStudio</h1>
+        <p class="landing-subtitle">Capturing moments, creating memories</p>
+        <div class="landing-buttons">
+            <a href="user-login.html" class="landing-button primary">User Login</a>
+            <a href="admin.html" class="landing-button secondary">Admin Login</a>
+        </div>
+    </div>
+</body>
+</html>

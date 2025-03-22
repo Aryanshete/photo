@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Studio Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 30px;
+        }
+
+        .logo i {
+            font-size: 24px;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+        }
+
+        .menu-item {
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .category-list {
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+        }
+
+        .category-item {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .category-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .category-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .photo-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: opacity 0.3s;
+        }
+
+        .photo-card img[data-src] {
+            opacity: 0.5;
+        }
+
+        .photo-info {
+            padding: 20px;
+            background: white;
+        }
+
+        .photo-info h3 {
+            margin: 0 0 10px 0;
+            color: #1e3c72;
+            font-size: 1.1rem;
+        }
+
+        .photo-info p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .loading-placeholder {
+            background: #f0f0f0;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .search-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .user-profile {
+            margin-top: auto;
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            padding: 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #noPhotosMessage {
+            text-align: center;
+            padding: 40px;
+            color: #636e72;
+            font-size: 18px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #636e72;
+            font-size: 18px;
+        }
+
+        .loading i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success {
+            border-left: 4px solid #00b894;
+        }
+
+        .toast.error {
+            border-left: 4px solid #d63031;
+        }
+
+        .toast i {
+            font-size: 1.2rem;
+        }
+
+        .toast.success i {
+            color: #00b894;
+        }
+
+        .toast.error i {
+            color: #d63031;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-camera-retro"></i>
+            <h1>Photo Studio</h1>
+        </div>
+        
+        <div class="menu-item active" onclick="loadPhotos()">
+            <i class="fas fa-th"></i>
+            All Photos
+        </div>
+        
+        <div class="menu-item" onclick="showFavorites()">
+            <i class="fas fa-heart"></i>
+            Favorites
+        </div>
+        
+        <div class="category-list">
+            <h2>Categories</h2>
+            <div id="categoryList">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading categories...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=User&background=1e3c72&color=fff" alt="User Avatar">
+            <div class="user-info">
+                <h3 id="userName">User</h3>
+                <p id="userEmail">user@example.com</p>
+            </div>
+            <button onclick="logout()" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="search-bar">
+            <input type="text" class="search-input" placeholder="Search photos..." onkeyup="searchPhotos(this.value)">
+        </div>
+        
+        <div class="photo-grid" id="photoGrid">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading photos...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                window.location.href = '/user-login.html';
+                return null;
+            }
+            return token;
+        }
+
+        // Load user data
+        async function loadUserData() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('userName').textContent = data.user.name;
+                    document.getElementById('userEmail').textContent = data.user.email;
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Load categories
+        async function loadCategories() {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/categories', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const categoryList = document.getElementById('categoryList');
+                    categoryList.innerHTML = '';
+
+                    data.categories.forEach(category => {
+                        const categoryItem = document.createElement('div');
+                        categoryItem.className = 'category-item';
+                        categoryItem.onclick = () => loadPhotos(category.id);
+                        categoryItem.innerHTML = `
+                            <i class="fas fa-folder"></i>
+                            ${category.name}
+                        `;
+                        categoryList.appendChild(categoryItem);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                showToast('Failed to load categories', 'error');
+            }
+        }
+
+        // Load photos
+        async function loadPhotos(categoryId = null) {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const url = categoryId 
+                    ? `/api/photos?categoryId=${categoryId}`
+                    : '/api/photos';
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                const photoGrid = document.querySelector('.photo-grid');
+                photoGrid.innerHTML = '';
+
+                if (data.success && data.photos.length > 0) {
+                    data.photos.forEach(photo => {
+                        photoGrid.appendChild(createPhotoCard(photo));
+                    });
+                    initLazyLoading();
+                } else {
+                    photoGrid.innerHTML = `
+                        <div id="noPhotosMessage">
+                            <i class="fas fa-images"></i>
+                            <p>No photos found</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading photos:', error);
+                showToast('Failed to load photos', 'error');
+            }
+        }
+
+        // Create photo card
+        function createPhotoCard(photo) {
+            const card = document.createElement('div');
+            card.className = 'photo-card';
+            
+            const img = document.createElement('img');
+            img.setAttribute('data-src', photo.url);
+            img.alt = photo.title;
+            
+            const info = document.createElement('div');
+            info.className = 'photo-info';
+            info.innerHTML = `
+                <h3>${photo.title}</h3>
+                <p><i class="fas fa-calendar"></i> ${new Date(photo.uploadDate).toLocaleDateString()}</p>
+            `;
+            
+            card.appendChild(img);
+            card.appendChild(info);
+            return card;
+        }
+
+        // Initialize lazy loading
+        function initLazyLoading() {
+            const images = document.querySelectorAll('img[data-src]');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            images.forEach(img => imageObserver.observe(img));
+        }
+
+        // Search photos
+        let searchTimeout;
+        function searchPhotos(query) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadPhotos(null, query);
+            }, 500);
+        }
+
+        // Show favorites
+        function showFavorites() {
+            const photoGrid = document.querySelector('.photo-grid');
+            photoGrid.innerHTML = '<div class="loading-placeholder">Loading favorites...</div>';
+            // Implement favorites functionality
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('userToken');
+            window.location.href = '/user-login.html';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            checkAuth();
+            loadUserData();
+            loadCategories();
+            loadPhotos();
+        });
+    </script>
+</body>
+</html>

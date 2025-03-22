@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Photo Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar-header {
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 10px 0;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #34495e;
+        }
+
+        .nav-links i {
+            margin-right: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+        }
+
+        .upload-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #2980b9;
+        }
+
+        .upload-btn i {
+            margin-right: 10px;
+        }
+
+        /* Photo Grid */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .photo-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .photo-info {
+            padding: 15px;
+        }
+
+        .photo-info h3 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .photo-info p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .photo-actions {
+            padding: 10px 15px;
+            border-top: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .photo-actions button {
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .photo-actions button:hover {
+            color: #3498db;
+        }
+
+        /* Upload Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .upload-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+
+        .toast.error {
+            background: #c0392b;
+        }
+
+        .toast i {
+            margin-right: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="user-avatar">
+                    <span id="userName">User Name</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li>
+                    <a href="#photos">
+                        <i class="fas fa-images"></i>
+                        My Photos
+                    </a>
+                </li>
+                <li>
+                    <a href="#favorites">
+                        <i class="fas fa-heart"></i>
+                        Favorites
+                    </a>
+                </li>
+                <li>
+                    <a href="#albums">
+                        <i class="fas fa-folder"></i>
+                        Albums
+                    </a>
+                </li>
+                <li>
+                    <a href="#settings">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>My Photos</h1>
+                <button class="upload-btn" onclick="showUploadModal()">
+                    <i class="fas fa-upload"></i>
+                    Upload Photo
+                </button>
+            </div>
+
+            <!-- Photo Grid -->
+            <div class="photo-grid" id="photoGrid">
+                <!-- Photos will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2>Upload Photo</h2>
+            <form class="upload-form" id="uploadForm" onsubmit="handleUpload(event)">
+                <div class="form-group">
+                    <label for="photoTitle">Title</label>
+                    <input type="text" id="photoTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="photoCategory">Category</label>
+                    <select id="photoCategory" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Nature">Nature</option>
+                        <option value="Portrait">Portrait</option>
+                        <option value="Architecture">Architecture</option>
+                        <option value="Travel">Travel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="photoFile">Photo</label>
+                    <input type="file" id="photoFile" name="photo" accept="image/*" required>
+                </div>
+                <button type="submit" class="upload-btn">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Upload
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <script>
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                window.location.href = '/user-login.html';
+                return;
+            }
+
+            verifyToken(token);
+            loadPhotos();
+        });
+
+        // Verify user token
+        async function verifyToken(token) {
+            try {
+                const response = await fetch('http://localhost:3001/api/users/verify', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('userName').textContent = data.user.name;
+                } else {
+                    handleLogout();
+                }
+            } catch (error) {
+                console.error('Error verifying token:', error);
+                handleLogout();
+            }
+        }
+
+        // Load user's photos
+        async function loadPhotos() {
+            try {
+                const response = await fetch('http://localhost:3001/api/users/photos', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const photoGrid = document.getElementById('photoGrid');
+                    photoGrid.innerHTML = data.photos.map(photo => `
+                        <div class="photo-card">
+                            <img src="${photo.url}" alt="${photo.title}">
+                            <div class="photo-info">
+                                <h3>${photo.title}</h3>
+                                <p>${photo.category}</p>
+                            </div>
+                            <div class="photo-actions">
+                                <button onclick="toggleFavorite(${photo.id})">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <button onclick="sharePhoto(${photo.id})">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                                <button onclick="deletePhoto(${photo.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading photos:', error);
+                showToast('Error loading photos', 'error');
+            }
+        }
+
+        // Upload photo
+        async function handleUpload(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/users/photos', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: formData.get('title'),
+                        category: formData.get('category')
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('Photo uploaded successfully', 'success');
+                    closeModal();
+                    loadPhotos();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                showToast('Error uploading photo', 'error');
+            }
+        }
+
+        // Modal functions
+        function showUploadModal() {
+            document.getElementById('uploadModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('uploadForm').reset();
+        }
+
+        // Photo actions
+        function toggleFavorite(photoId) {
+            // Implement favorite functionality
+            showToast('Added to favorites', 'success');
+        }
+
+        function sharePhoto(photoId) {
+            // Implement share functionality
+            showToast('Share link copied to clipboard', 'success');
+        }
+
+        function deletePhoto(photoId) {
+            // Implement delete functionality
+            if (confirm('Are you sure you want to delete this photo?')) {
+                showToast('Photo deleted', 'success');
+                loadPhotos();
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Logout
+        function handleLogout() {
+            localStorage.removeItem('userToken');
+            window.location.href = '/user-login.html';
+        }
+    </script>
+</body>
+</html>
