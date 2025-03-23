@@ -1,8 +1,8 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 
 const User = require('./models/User');
 
@@ -83,20 +83,20 @@ const auth = async (req, res, next) => {
 };
 
 // User login route with proper password comparison
-app.post('/api/users/login', async (req, res) => {
+app.post('/api/admin/admin-login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
+        const admin = await Admin.findOne({ email });
 
-        if (!user) {
+        if (!admin) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid email or password'
             });
         }
 
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
+        const isValidPassword = await bcrypt.compare(password, admin.password);
+        if (!isValidPassword) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid email or password'
@@ -104,28 +104,27 @@ app.post('/api/users/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { _id: user._id, role: user.role },
-            JWT_SECRET,
+            { id: admin._id, email: admin.email },
+            process.env.JWT_SECRET || 'your-secret-key',
             { expiresIn: '24h' }
         );
 
         res.json({
             success: true,
+            message: 'Login successful',
             token,
-            user: {
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
+            admin
         });
+
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('Admin login error:', error);
         res.status(500).json({
             success: false,
             message: 'Server error'
         });
     }
 });
+
 
 // Protected route example
 app.get('/api/protected', auth, (req, res) => {

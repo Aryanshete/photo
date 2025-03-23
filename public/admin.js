@@ -11,7 +11,7 @@ let searchDebounceTimer;
 const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = '/admin-login.html';
         return;
     }
 
@@ -25,7 +25,7 @@ const fetchWithAuth = async (url, options = {}) => {
     const response = await fetch(`${API_BASE_URL}${url}`, { ...defaultOptions, ...options });
     if (response.status === 401) {
         localStorage.removeItem('token');
-        window.location.href = '/login.html';
+        window.location.href = '/admin-login.html';
         return;
     }
     return response;
@@ -246,7 +246,7 @@ const openModal = (modalId) => {
 document.addEventListener('DOMContentLoaded', () => {
     // Check authentication
     if (!localStorage.getItem('token')) {
-        window.location.href = '/login.html';
+        window.location.href = '/admin-login.html';
         return;
     }
 
@@ -263,6 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
         localStorage.removeItem('token');
-        window.location.href = '/login.html';
+        window.location.href = '/admin-login.html';
     });
 });
